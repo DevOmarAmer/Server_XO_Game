@@ -4,9 +4,16 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.server_xo_game.PrimaryController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mycompany.server_xo_game.PrimaryController">
    <children>
-      <ToggleButton fx:id="toggleBtn_id" layoutX="231.0" layoutY="90.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="138.0" text="Server On" />
-      <Button fx:id="show_chart_id" layoutX="240.0" layoutY="240.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="120.0" text="Show Chart" />
+      <ToggleButton fx:id="toggleBtn_id" layoutX="231.0" layoutY="90.0"
+                    prefHeight="46.0" prefWidth="138.0" text="Server On"
+                    onAction="#handleToggle"/>
+      <Button fx:id="show_chart_id" layoutX="240.0" layoutY="240.0"
+              prefHeight="53.0" prefWidth="120.0" text="Show Chart"
+              onAction="#showChart"/>
    </children>
 </AnchorPane>
