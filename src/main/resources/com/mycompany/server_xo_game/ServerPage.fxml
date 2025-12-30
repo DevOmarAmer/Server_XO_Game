@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<Pane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.server_xo_game.ServerPageController">
+   <children>
+      <ImageView id="backgroundimg" fx:id="bgImg" cache="true" fitHeight="400.0" fitWidth="600.0" pickOnBounds="true">
+         <image>
+            <Image url="@assets/bgimg.png" />
+         </image>
+      </ImageView>
+      <VBox id="wholevbox" fx:id="wholeVbox" alignment="CENTER" prefHeight="400.0" prefWidth="600.0">
+         <children>
+            <Label id="title" fx:id="gameTitle" alignment="CENTER" prefHeight="127.0" prefWidth="702.0" text="Tic-Tac-Toe Server" textAlignment="CENTER" textFill="#1f1f1f">
+               <font>
+                  <Font name="Segoe UI Black" size="40.0" />
+               </font>
+            </Label>
+            <Button id="startbutton" fx:id="startButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onClickstartButton" prefHeight="61.0" prefWidth="210.0" text="Start Server" textAlignment="CENTER">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <HBox id="statshbox" fx:id="statsHbox" alignment="CENTER" prefHeight="188.0" prefWidth="600.0">
+               <children>
+                  <VBox id="onlinevbox" fx:id="onlineVbox" alignment="TOP_CENTER" prefHeight="188.0" prefWidth="164.0">
+                     <children>
+                        <Label id="onlinetitle" fx:id="onlineTitle" alignment="CENTER" contentDisplay="CENTER" prefHeight="98.0" prefWidth="158.0" text="Online Players" textFill="#2e7d32" wrapText="true">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label id="onlinenum" fx:id="onlineNum" alignment="CENTER" contentDisplay="CENTER" prefHeight="94.0" prefWidth="171.0" text="17" textFill="#1b5e20" wrapText="true">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <PieChart id="piechart" fx:id="pieChart" prefHeight="188.0" prefWidth="231.0" title="Availability" />
+                  <VBox id="offlinevbox" fx:id="offlineVbox" alignment="TOP_CENTER" prefHeight="188.0" prefWidth="158.0">
+                     <children>
+                        <Label id="offlinetitle" fx:id="offlineTitle" alignment="CENTER" contentDisplay="CENTER" prefHeight="101.0" prefWidth="158.0" text="Offline Players" textFill="#b43232" wrapText="true">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label id="offlinenum" fx:id="offlineNum" alignment="CENTER" contentDisplay="CENTER" prefHeight="94.0" prefWidth="161.0" text="5" textFill="#813434" wrapText="true">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</Pane>
