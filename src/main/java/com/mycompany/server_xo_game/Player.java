@@ -16,13 +16,15 @@ public class Player{
     private String email;
     private String passwordHash;
     private int points;
+    private int status;
     
-    public Player(int id, String username, String email, String plainPassword, int points) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.passwordHash = hashPassword(plainPassword);
-        this.points = points;
+    public Player(int id, String username, String email, String plainPassword, int points, int status) {
+    this.id = id;
+    this.username = username;
+    this.email = email;
+    this.passwordHash = hashPassword(plainPassword);
+    this.points = points;
+    this.status = status;
     }
 
     public int getId() {
@@ -67,6 +69,13 @@ public class Player{
     public void setPoints(int points) {
         this.points = points;
     }
+    public int getStatus() {
+    return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
     
     //Hashing Method
     public static String hashPassword(String password) {
@@ -81,5 +90,9 @@ public class Player{
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+    public static void main(String[] args) {
+        Player p = new Player(0, "Memo", "mail", "123", 10, 2);
+        System.out.println(p.getStatus());
     }
 }
