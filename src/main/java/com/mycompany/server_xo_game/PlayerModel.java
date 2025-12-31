@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author MahmoudTarek
  */
-public class Player{
+public class PlayerModel{
     private int id;
     private String username;
     private String email;
@@ -18,7 +18,7 @@ public class Player{
     private int points;
     private int status;
     
-    public Player(String username, String email, String plainPassword, int points, int status) {
+    public PlayerModel(String username, String email, String plainPassword, int points, int status) {
     this.username = username;
     this.email = email;
     this.passwordHash = hashPassword(plainPassword);
