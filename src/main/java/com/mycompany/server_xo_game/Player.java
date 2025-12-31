@@ -91,8 +91,4 @@ public class Player{
             throw new RuntimeException(e);
         }
     }
-    public static void main(String[] args) {
-        Player p = new Player(0, "Memo", "mail", "123", 10, 2);
-        System.out.println(p.getStatus());
-    }
 }
