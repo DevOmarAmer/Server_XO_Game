@@ -18,8 +18,7 @@ public class Player{
     private int points;
     private int status;
     
-    public Player(int id, String username, String email, String plainPassword, int points, int status) {
-    this.id = id;
+    public Player(String username, String email, String plainPassword, int points, int status) {
     this.username = username;
     this.email = email;
     this.passwordHash = hashPassword(plainPassword);
@@ -32,10 +31,6 @@ public class Player{
     }
     public String getIdStr() {
         return id+"";
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getUsername() {
