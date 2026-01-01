@@ -39,14 +39,15 @@ public class DAO {
         System.out.println("Successfully Connected...");
     }
 
-    public void insert(PlayerModel p) throws SQLException {
+    public boolean register(PlayerModel p) throws SQLException {
         PreparedStatement ps = con.prepareStatement(INSERT);
         ps.setString(1, p.getUsername());
         ps.setString(2, p.getEmail());
         ps.setString(3, p.getPasswordHash());
         ps.setInt(4, p.getPoints());
         ps.setInt(5, p.getStatus());
-        ps.executeUpdate();
+        int rows = ps.executeUpdate();
+        return rows > 0;
     }
 
     public void update(PlayerModel p,int id) throws SQLException {
