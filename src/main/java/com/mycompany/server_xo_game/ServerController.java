@@ -90,6 +90,15 @@ public class ServerController {
         }
     }
 
-
+  // Handle move made by a player
+      public static void handleMove(ClientHandler client, JSONObject request) {
+        int row = request.getInt("row");
+        int col = request.getInt("col");
+        // Find the GameSession for this player (you need to map players to sessions)
+        GameSession session = GameSessionManager.getSession(client);
+        if (session != null) {
+            session.makeMove(client, row, col);
+        }
+    }
     
 }
