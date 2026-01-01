@@ -56,6 +56,40 @@ public class ServerController {
         response.put("players", players);
         client.sendMessage(response);
     }
+            // Send invite to another player
+    public static void sendInvite(ClientHandler sender, JSONObject request) {
+        String toUser = request.getString("to");
+        ClientHandler receiver = Server.onlinePlayers.get(toUser);
+
+        if (receiver != null) {
+            JSONObject invite = new JSONObject();
+            invite.put("type", "invitation");
+            invite.put("from", sender.getUsername());
+            receiver.sendMessage(invite);
+        }
+    }
+
+    // Handle invite response
+    public static void handleInviteResponse(ClientHandler responder, JSONObject request) {
+        String fromUser = request.getString("from");
+        boolean accepted = request.getBoolean("accepted");
+
+        ClientHandler sender = Server.onlinePlayers.get(fromUser);
+        if (sender != null) {
+            JSONObject response = new JSONObject();
+            response.put("type", "invite_response");
+            response.put("accepted", accepted);
+
+            sender.sendMessage(response);
+
+            if (accepted) {
+                // Start a new game session
+                GameSession session = new GameSession(sender, responder);
+                new Thread(session).start();
+            }
+        }
+    }
+
 
     
 }
