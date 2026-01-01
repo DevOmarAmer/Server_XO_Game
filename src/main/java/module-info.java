@@ -4,6 +4,7 @@ module com.mycompany.server_xo_game {
     requires java.sql;
     requires derbyclient;
     requires java.base;
+    requires org.json;
 
     opens com.mycompany.server_xo_game to javafx.fxml;
     exports com.mycompany.server_xo_game;
