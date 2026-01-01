@@ -39,7 +39,7 @@ public class DAO {
         System.out.println("Successfully Connected...");
     }
 
-    public void insert(Player p) throws SQLException {
+    public void insert(PlayerModel p) throws SQLException {
         PreparedStatement ps = con.prepareStatement(INSERT);
         ps.setString(1, p.getUsername());
         ps.setString(2, p.getEmail());
@@ -49,7 +49,7 @@ public class DAO {
         ps.executeUpdate();
     }
 
-    public void update(Player p,int id) throws SQLException {
+    public void update(PlayerModel p,int id) throws SQLException {
         PreparedStatement ps = con.prepareStatement(UPDATE);
         ps.setString(1, p.getUsername());
         ps.setString(2, p.getEmail());
