@@ -1,3 +1,5 @@
+package com.mycompany.server_xo_game;
+
 import java.io.*;
 import java.net.Socket;
 import org.json.JSONObject;
