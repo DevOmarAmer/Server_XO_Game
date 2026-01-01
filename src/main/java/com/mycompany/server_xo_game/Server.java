@@ -1,3 +1,5 @@
+package com.mycompany.server_xo_game;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
