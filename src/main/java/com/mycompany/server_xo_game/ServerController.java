@@ -17,6 +17,7 @@ public class ServerController {
 
         boolean success = DAO.login(username, password); // call DAO
         JSONObject response = new JSONObject();
+        response.put("type", "login_response");
         if (success) {
             client.setUsername(username);
             Server.onlinePlayers.put(username, client);
