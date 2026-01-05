@@ -95,7 +95,7 @@ public class ServerController {
         int row = request.getInt("row");
         int col = request.getInt("col");
         // Find the GameSession for this player (you need to map players to sessions)
-        GameSession session = GameSessionManger.getSession(client);
+        GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
             session.makeMove(client, row, col);
         }
