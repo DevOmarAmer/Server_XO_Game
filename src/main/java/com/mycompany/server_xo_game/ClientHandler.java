@@ -3,6 +3,7 @@ package com.mycompany.server_xo_game;
 import java.io.*;
 import java.net.Socket;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -29,8 +30,12 @@ public class ClientHandler implements Runnable {
         try {
             String message;
             while ((message = in.readLine()) != null) {
-                JSONObject request = new JSONObject(message);
-                handleRequest(request);
+                try {
+                    JSONObject request = new JSONObject(message);
+                    handleRequest(request);
+                } catch (JSONException e) {
+                    System.err.println("Received invalid JSON from client: " + message);
+                }
             }
         } catch (IOException e) {
             System.out.println("Client disconnected: " + username);
