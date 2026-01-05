@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
-    public static final int PORT = 6666;
+    public static final int PORT = 8888;
     // Store online players and their ClientHandlers
     public static ConcurrentHashMap<String, ClientHandler> onlinePlayers = new ConcurrentHashMap<>();
 
