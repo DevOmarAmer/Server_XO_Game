@@ -129,4 +129,9 @@ public class DAO {
         }
     }
     
+    public void close() throws SQLException {
+        if (con != null && !con.isClosed()) {
+            con.close();
+        }
+    }
 }
