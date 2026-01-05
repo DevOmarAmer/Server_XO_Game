@@ -33,17 +33,25 @@ public class ServerController {
         String username = request.getString("username");
         String password = request.getString("password");
         String email = request.getString("email");
-         DAO dao;
+        
+        JSONObject response = new JSONObject();
+        response.put("type", "register_response");
+
+        DAO dao = null;
         try {
             dao = new DAO();
-       
-        boolean success = dao.register(new PlayerModel(username, email, password, 0, 0));
-        JSONObject response = new JSONObject();
-        response.put("status", success ? "success" : "failed");
-        client.sendMessage(response);
-         } catch (SQLException ex) {
+            boolean success = dao.register(new PlayerModel(username, email, password, 0, 0));
+            response.put("status", success ? "success" : "failed");
+        } catch (SQLException ex) {
+            System.err.println("Registration Failed: " + ex.getMessage());
+            ex.printStackTrace();
             System.getLogger(ServerController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            response.put("status", "failed");
+            response.put("reason", ex.getMessage());
+        } finally {
+            if (dao != null) try { dao.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
+        client.sendMessage(response);
     }
         public static void sendAvailablePlayers(ClientHandler client) {
         JSONArray players = new JSONArray();
