@@ -6,13 +6,17 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 public class ClientHandler implements Runnable {
+
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private String username; // logged-in player's username
+    private PlayerStatus status;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
+        // Initialize status to ONLINE when client connects
+        this.status = PlayerStatus.ONLINE;
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -43,7 +47,10 @@ public class ClientHandler implements Runnable {
             if (username != null) {
                 Server.onlinePlayers.remove(username);
             }
-            try { socket.close(); } catch (IOException ignored) {}
+            try {
+                socket.close();
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -73,6 +80,20 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void setUsername(String username) { this.username = username; }
-    public String getUsername() { return username; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    // New Getter and Setter for Status
+    public void setStatus(PlayerStatus status) {
+        this.status = status;
+    }
+
+    public PlayerStatus getStatus() {
+        return status;
+    }
 }
