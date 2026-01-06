@@ -11,9 +11,12 @@ public class Server {
     public static ConcurrentHashMap<String, ClientHandler> onlinePlayers = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
+        System.out.println("Attempting to start server on port " + PORT + "...");
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            
+            System.out.println("=================================================================================");
             System.out.println("Server started on port " + PORT);
-
+            System.out.println("=================================================================================");
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected: " + clientSocket.getInetAddress());
@@ -23,6 +26,7 @@ public class Server {
             }
 
         } catch (IOException e) {
+            System.err.println("Server failed to start. Port " + PORT + " is likely already in use.");
             e.printStackTrace();
         }
     }

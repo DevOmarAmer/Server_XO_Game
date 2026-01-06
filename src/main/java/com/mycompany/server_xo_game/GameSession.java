@@ -1,5 +1,7 @@
 package com.mycompany.server_xo_game;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONObject;
 
 public class GameSession implements Runnable {
@@ -8,6 +10,7 @@ public class GameSession implements Runnable {
     private ClientHandler player2;
     private char[][] board = new char[3][3];
     private ClientHandler currentTurn;
+    private List<JSONObject> moves = new ArrayList<>();
 
     public GameSession(ClientHandler p1, ClientHandler p2) {
         this.player1 = p1;
@@ -42,13 +45,27 @@ public class GameSession implements Runnable {
         moveMsg.put("row", row);
         moveMsg.put("col", col);
         moveMsg.put("player", player.getUsername());
+        moves.add(moveMsg); // Record the move
         opponent.sendMessage(moveMsg);
 
         if (checkWin()) {
             endGame(player);
+        } else if (isBoardFull()) {
+            endGame(); // Draw
         } else {
             currentTurn = opponent;
         }
+    }
+
+    private boolean isBoardFull() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == '\0') {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private boolean checkWin() {
@@ -69,17 +86,41 @@ public class GameSession implements Runnable {
 
     private void endGame(ClientHandler winner) {
         ClientHandler loser = (winner == player1) ? player2 : player1;
+        endGame(winner, loser);
+    }
 
+    private void endGame(ClientHandler winner, ClientHandler loser) {
         JSONObject msg = new JSONObject();
         msg.put("type", "game_over");
         msg.put("winner", winner.getUsername());
         winner.sendMessage(msg);
-
-        msg.put("winner", winner.getUsername());
         loser.sendMessage(msg);
 
         // Update scores in DB
         DAO.updateScore(winner.getUsername(), 1);
         DAO.updateScore(loser.getUsername(), 0);
+
+        saveGameRecord(winner.getUsername());
+    }
+
+    private void endGame() { // Draw
+        JSONObject msg = new JSONObject();
+        msg.put("type", "game_over");
+        msg.put("winner", "draw");
+        player1.sendMessage(msg);
+        player2.sendMessage(msg);
+
+        saveGameRecord("draw");
+    }
+
+    private void saveGameRecord(String result) {
+        JSONObject gameRecord = new JSONObject();
+        gameRecord.put("player1", player1.getUsername());
+        gameRecord.put("player2", player2.getUsername());
+        gameRecord.put("result", result);
+        gameRecord.put("moves", moves);
+
+        // Assuming DAO.saveGame method exists to store the game record
+        DAO.saveGame(gameRecord.toString());
     }
 }
