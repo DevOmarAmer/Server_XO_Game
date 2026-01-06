@@ -129,6 +129,29 @@ public class DAO {
         }
     }
     
+    /**
+     * You need to create the GAME_RECORDS table in your database for this to work.
+     * SQL to create table:
+     * CREATE TABLE GAME_RECORDS (
+     *     record_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+     *     game_data CLOB,
+     *     played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     * );
+     */
+    public static void saveGame(String gameData) {
+        String sql = "INSERT INTO GAME_RECORDS (game_data) VALUES (?)";
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/TEAM1",
+                "Team1",
+                "team1");
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, gameData);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void close() throws SQLException {
         if (con != null && !con.isClosed()) {
             con.close();
