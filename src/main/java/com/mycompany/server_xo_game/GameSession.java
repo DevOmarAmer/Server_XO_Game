@@ -5,7 +5,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 public class GameSession implements Runnable {
-      
+
     private ClientHandler player1;
     private ClientHandler player2;
     private char[][] board = new char[3][3];
@@ -16,6 +16,9 @@ public class GameSession implements Runnable {
         this.player1 = p1;
         this.player2 = p2;
         currentTurn = player1;
+
+        // Fix: Call the method once with both players and the session
+        GameSessionManager.addSession(p1, p2, this);
     }
 
     @Override
@@ -34,7 +37,9 @@ public class GameSession implements Runnable {
     }
 
     public synchronized void makeMove(ClientHandler player, int row, int col) {
-        if (player != currentTurn || board[row][col] != '\0') return;
+        if (player != currentTurn || board[row][col] != '\0') {
+            return;
+        }
 
         board[row][col] = (player == player1) ? 'X' : 'O';
 
@@ -72,13 +77,13 @@ public class GameSession implements Runnable {
         // check rows, columns, diagonals
         char symbol = (currentTurn == player1) ? 'X' : 'O';
         for (int i = 0; i < 3; i++) {
-            if ((board[i][0] == symbol && board[i][1] == symbol && board[i][2] == symbol) ||
-                (board[0][i] == symbol && board[1][i] == symbol && board[2][i] == symbol)) {
+            if ((board[i][0] == symbol && board[i][1] == symbol && board[i][2] == symbol)
+                    || (board[0][i] == symbol && board[1][i] == symbol && board[2][i] == symbol)) {
                 return true;
             }
         }
-        if ((board[0][0] == symbol && board[1][1] == symbol && board[2][2] == symbol) ||
-            (board[0][2] == symbol && board[1][1] == symbol && board[2][0] == symbol)) {
+        if ((board[0][0] == symbol && board[1][1] == symbol && board[2][2] == symbol)
+                || (board[0][2] == symbol && board[1][1] == symbol && board[2][0] == symbol)) {
             return true;
         }
         return false;
@@ -101,6 +106,14 @@ public class GameSession implements Runnable {
         DAO.updateScore(loser.getUsername(), 0);
 
         saveGameRecord(winner.getUsername());
+
+        // Reset status to ONLINE
+        winner.setStatus(PlayerStatus.ONLINE);
+        loser.setStatus(PlayerStatus.ONLINE);
+
+        // Cleanup session
+        GameSessionManager.removeSession(winner);
+        GameSessionManager.removeSession(loser);
     }
 
     private void endGame() { // Draw
@@ -111,6 +124,14 @@ public class GameSession implements Runnable {
         player2.sendMessage(msg);
 
         saveGameRecord("draw");
+
+        // Reset status to ONLINE
+        player1.setStatus(PlayerStatus.ONLINE);
+        player2.setStatus(PlayerStatus.ONLINE);
+
+        // Cleanup session
+        GameSessionManager.removeSession(player1);
+        GameSessionManager.removeSession(player2);
     }
 
     private void saveGameRecord(String result) {
