@@ -45,13 +45,10 @@ public class ServerPageController implements Initializable {
     @FXML
     private Label offlineNum;
     
-
-    
-  
     private PieChart.Data onlineData;
     private PieChart.Data inGameData;
     private PieChart.Data offlineData;
-    
+    private AnimationTimer statsUpdater;
       private void setupPieChart() {
        
         onlineData = new PieChart.Data("Online", 0);
@@ -76,6 +73,22 @@ public class ServerPageController implements Initializable {
             offlineData.getNode().setStyle("-fx-pie-color: #8a2be2;");
         });
     }
+      
+          private void setupStatsUpdater() {
+       
+        statsUpdater = new AnimationTimer() {
+            private long lastUpdate = 0;
+            
+            @Override
+            public void handle(long now) {
+                if (now - lastUpdate >= 1_000_000_000) { 
+
+                    lastUpdate = now;
+                }
+            }
+        };
+    }
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
