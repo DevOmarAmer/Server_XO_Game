@@ -78,6 +78,7 @@ public class ClientHandler implements Runnable {
                 break;
             case "quit_game":
                 ServerController.handleQuitGame(this);
+                break;
             // --- NEW CASES BELOW ---
             case "get_profile":
                 ServerController.getProfile(this);
