@@ -45,9 +45,37 @@ public class ServerPageController implements Initializable {
     @FXML
     private Label offlineNum;
     
-    
+
     
   
+    private PieChart.Data onlineData;
+    private PieChart.Data inGameData;
+    private PieChart.Data offlineData;
+    
+      private void setupPieChart() {
+       
+        onlineData = new PieChart.Data("Online", 0);
+        inGameData = new PieChart.Data("In Game", 0);
+        offlineData = new PieChart.Data("Offline", 0);
+        
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
+            onlineData,
+            inGameData,
+            offlineData
+        );
+        
+        pieChart.setData(pieChartData);
+        pieChart.setLegendVisible(false);
+        pieChart.setLabelsVisible(true);
+        pieChart.setStartAngle(90);
+        pieChart.setAnimated(true);
+        
+        Platform.runLater(() -> {
+            onlineData.getNode().setStyle("-fx-pie-color: #00d2ff;");
+            inGameData.getNode().setStyle("-fx-pie-color: #ff007f;");
+            offlineData.getNode().setStyle("-fx-pie-color: #8a2be2;");
+        });
+    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
