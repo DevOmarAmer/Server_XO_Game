@@ -156,9 +156,9 @@ public class GameSession implements Runnable {
         loseMsg.put("winner", winner.getUsername());
         loser.sendMessage(loseMsg);
 
-        // Update scores in DB
-        DAO.updateScore(winner.getUsername(), 1);
-        DAO.updateScore(loser.getUsername(), 0);
+        // Update stats in DB
+        DAO.updatePlayerStats(winner.getUsername(), "WIN");
+        DAO.updatePlayerStats(loser.getUsername(), "LOSS");
 
         saveGameRecord(winner.getUsername());
     }
@@ -171,6 +171,10 @@ public class GameSession implements Runnable {
         
         player1.sendMessage(drawMsg);
         player2.sendMessage(drawMsg);
+
+        // Update stats in DB for a draw
+        DAO.updatePlayerStats(player1.getUsername(), "DRAW");
+        DAO.updatePlayerStats(player2.getUsername(), "DRAW");
 
         saveGameRecord("draw");
     }
@@ -228,9 +232,9 @@ public class GameSession implements Runnable {
     public synchronized void handlePlayerQuit(ClientHandler player) {
         ClientHandler opponent = (player == player1) ? player2 : player1;
         
-        // Update scores: Opponent wins (+10), Quitter gets penalty (-10)
-        // DAO.updateScore(opponent.getUsername(), 10);
-        DAO.updateScore(player.getUsername(), -10);
+        // Opponent wins, quitter loses
+        DAO.updatePlayerStats(opponent.getUsername(), "WIN");
+        DAO.updatePlayerStats(player.getUsername(), "LOSS");
 
         // Save game record with opponent as winner
         saveGameRecord(opponent.getUsername());

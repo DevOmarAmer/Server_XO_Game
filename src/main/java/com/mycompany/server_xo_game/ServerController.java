@@ -159,9 +159,9 @@ public class ServerController {
                 response.put("email", player.getEmail());
                 response.put("score", player.getPoints());
                 // If you don't have these columns in DB yet, send 0 or calculate them
-                response.put("wins", 0);
-                response.put("losses", 0);
-                response.put("draws", 0);
+                response.put("wins", player.getWins());
+                response.put("losses", player.getLosses());
+                response.put("draws", player.getDraws());
             } else {
                 response.put("status", "failed");
             }
