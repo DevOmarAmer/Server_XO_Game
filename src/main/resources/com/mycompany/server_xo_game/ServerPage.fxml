@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -7,58 +8,247 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-
-<Pane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.server_xo_game.ServerPageController">
+<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.mycompany.server_xo_game.ServerPageController"
+      prefHeight="600.0" prefWidth="900.0"
+      stylesheets="@styles/serverpage.css">
    <children>
-      <ImageView id="backgroundimg" fx:id="bgImg" cache="true" fitHeight="400.0" fitWidth="600.0" pickOnBounds="true">
+      <!-- Background Image -->
+      <ImageView id="backgroundimg" fx:id="bgImg" cache="true" 
+                 fitHeight="600.0" fitWidth="900.0" 
+                 pickOnBounds="true" preserveRatio="false">
          <image>
             <Image url="@assets/bgimg.png" />
          </image>
       </ImageView>
-      <VBox id="wholevbox" fx:id="wholeVbox" alignment="CENTER" prefHeight="400.0" prefWidth="600.0">
+      
+      <!-- Gradient Overlay -->
+      <Pane styleClass="gradient-overlay" prefHeight="600.0" prefWidth="900.0" 
+            mouseTransparent="true" />
+      
+      <!-- Main Content -->
+      <VBox id="wholevbox" fx:id="wholeVbox" alignment="TOP_CENTER" 
+            prefHeight="600.0" prefWidth="900.0" spacing="25">
+         <padding>
+            <Insets top="25" bottom="25" left="30" right="30" />
+         </padding>
          <children>
-            <Label id="title" fx:id="gameTitle" alignment="CENTER" prefHeight="127.0" prefWidth="702.0" text="Tic-Tac-Toe Server" textAlignment="CENTER" textFill="#1f1f1f">
-               <font>
-                  <Font name="Segoe UI Black" size="40.0" />
-               </font>
-            </Label>
-            <Button id="startbutton" fx:id="startButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onClickstartButton" prefHeight="61.0" prefWidth="210.0" text="Start Server" textAlignment="CENTER">
-               <font>
-                  <Font size="16.0" />
-               </font>
-            </Button>
-            <HBox id="statshbox" fx:id="statsHbox" alignment="CENTER" prefHeight="188.0" prefWidth="600.0">
+            <!-- Header with Title and Controls -->
+            <HBox alignment="CENTER_LEFT" spacing="20" VBox.vgrow="NEVER">
                <children>
-                  <VBox id="onlinevbox" fx:id="onlineVbox" alignment="TOP_CENTER" prefHeight="188.0" prefWidth="164.0">
+                  <!-- Title Section -->
+                  <VBox alignment="CENTER_LEFT" spacing="8" HBox.hgrow="ALWAYS">
                      <children>
-                        <Label id="onlinetitle" fx:id="onlineTitle" alignment="CENTER" contentDisplay="CENTER" prefHeight="98.0" prefWidth="158.0" text="Online Players" textFill="#2e7d32" wrapText="true">
+                        <Label id="title" fx:id="gameTitle" 
+                               text="Server Dashboard" textFill="#FFFFFF">
                            <font>
-                              <Font size="20.0" />
+                              <Font name="Segoe UI Black" size="38.0" />
                            </font>
                         </Label>
-                        <Label id="onlinenum" fx:id="onlineNum" alignment="CENTER" contentDisplay="CENTER" prefHeight="94.0" prefWidth="171.0" text="17" textFill="#1b5e20" wrapText="true">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
+                        
+                        <!-- Server Status Indicator -->
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-container">
+                           <padding>
+                              <Insets top="6" bottom="6" left="15" right="15" />
+                           </padding>
+                           <children>
+                              <Circle fx:id="statusIndicator" radius="6.0" 
+                                      fill="#F44336" 
+                                      style="-fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.9), 15, 0.7, 0, 0);" />
+                              <Label fx:id="statusLabel" text="Server Offline" 
+                                     textFill="#F44336">
+                                 <font>
+                                    <Font name="Segoe UI Semibold" size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
-                  <PieChart id="piechart" fx:id="pieChart" prefHeight="188.0" prefWidth="231.0" title="Availability" />
-                  <VBox id="offlinevbox" fx:id="offlineVbox" alignment="TOP_CENTER" prefHeight="188.0" prefWidth="158.0">
+                  
+                  <!-- Start/Stop Button -->
+                  <Button id="startbutton" fx:id="startButton" 
+                          mnemonicParsing="false" onAction="#onClickstartButton" 
+                          prefHeight="50.0" prefWidth="160.0" 
+                          text="Start Server">
+                     <font>
+                        <Font name="Segoe UI Bold" size="16.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+            
+            <!-- Main Content Area - Chart and Stats -->
+            <HBox alignment="CENTER" spacing="30" VBox.vgrow="ALWAYS">
+               <children>
+                  <!-- Large Pie Chart -->
+                  <VBox alignment="CENTER" styleClass="chart-container" 
+                        prefWidth="450.0" HBox.hgrow="ALWAYS">
                      <children>
-                        <Label id="offlinetitle" fx:id="offlineTitle" alignment="CENTER" contentDisplay="CENTER" prefHeight="101.0" prefWidth="158.0" text="Offline Players" textFill="#b43232" wrapText="true">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
-                        <Label id="offlinenum" fx:id="offlineNum" alignment="CENTER" contentDisplay="CENTER" prefHeight="94.0" prefWidth="161.0" text="5" textFill="#813434" wrapText="true">
-                           <font>
-                              <Font size="24.0" />
-                           </font>
-                        </Label>
+                        <PieChart id="piechart" fx:id="pieChart" 
+                                  prefHeight="420.0" prefWidth="420.0"
+                                  title="Player Distribution"
+                                  legendVisible="false" 
+                                  labelsVisible="true"
+                                  animated="true">
+                        </PieChart>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Stats Cards -->
+                  <VBox alignment="CENTER" spacing="20" prefWidth="280.0">
+                     <children>
+                        <!-- Online Players Card -->
+                        <VBox id="onlinevbox" fx:id="onlineVbox" 
+                              alignment="CENTER" spacing="8"
+                              prefHeight="120.0" prefWidth="280.0">
+                           <padding>
+                              <Insets top="20" bottom="20" left="25" right="25" />
+                           </padding>
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="15" 
+                                    HBox.hgrow="ALWAYS" prefWidth="230.0">
+                                 <children>
+                                    <VBox alignment="CENTER_LEFT" spacing="3" 
+                                          HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="ONLINE" styleClass="stat-label">
+                                             <font>
+                                                <Font name="Segoe UI Bold" size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Players" styleClass="stat-sublabel">
+                                             <font>
+                                                <Font name="Segoe UI" size="12.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </VBox>
+                                    <Label id="onlinenum" fx:id="onlineNum" 
+                                           text="0" styleClass="stat-number">
+                                       <font>
+                                          <Font name="Segoe UI Black" size="42.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radius="4.0" fill="#00d2ff" 
+                                            style="-fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 8, 0.5, 0, 0);" />
+                                    <Label text="Active connections" 
+                                           styleClass="stat-description">
+                                       <font>
+                                          <Font name="Segoe UI" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        
+                        <!-- In Game Players Card -->
+                        <VBox id="ingamevbox" fx:id="inGameVbox" 
+                              alignment="CENTER" spacing="8"
+                              prefHeight="120.0" prefWidth="280.0">
+                           <padding>
+                              <Insets top="20" bottom="20" left="25" right="25" />
+                           </padding>
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="15" 
+                                    HBox.hgrow="ALWAYS" prefWidth="230.0">
+                                 <children>
+                                    <VBox alignment="CENTER_LEFT" spacing="3" 
+                                          HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="IN GAME" styleClass="stat-label">
+                                             <font>
+                                                <Font name="Segoe UI Bold" size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Players" styleClass="stat-sublabel">
+                                             <font>
+                                                <Font name="Segoe UI" size="12.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </VBox>
+                                    <Label id="ingamenum" fx:id="inGameNum" 
+                                           text="0" styleClass="stat-number">
+                                       <font>
+                                          <Font name="Segoe UI Black" size="42.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radius="4.0" fill="#ff007f" 
+                                            style="-fx-effect: dropshadow(gaussian, rgba(255, 0, 127, 0.6), 8, 0.5, 0, 0);" />
+                                    <Label text="Currently playing" 
+                                           styleClass="stat-description">
+                                       <font>
+                                          <Font name="Segoe UI" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                        
+                        <!-- Offline Players Card -->
+                        <VBox id="offlinevbox" fx:id="offlineVbox" 
+                              alignment="CENTER" spacing="8"
+                              prefHeight="120.0" prefWidth="280.0">
+                           <padding>
+                              <Insets top="20" bottom="20" left="25" right="25" />
+                           </padding>
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="15" 
+                                    HBox.hgrow="ALWAYS" prefWidth="230.0">
+                                 <children>
+                                    <VBox alignment="CENTER_LEFT" spacing="3" 
+                                          HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="OFFLINE" styleClass="stat-label">
+                                             <font>
+                                                <Font name="Segoe UI Bold" size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Players" styleClass="stat-sublabel">
+                                             <font>
+                                                <Font name="Segoe UI" size="12.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </VBox>
+                                    <Label id="offlinenum" fx:id="offlineNum" 
+                                           text="0" styleClass="stat-number">
+                                       <font>
+                                          <Font name="Segoe UI Black" size="42.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radius="4.0" fill="#8a2be2" 
+                                            style="-fx-effect: dropshadow(gaussian, rgba(138, 43, 226, 0.6), 8, 0.5, 0, 0);" />
+                                    <Label text="Registered users" 
+                                           styleClass="stat-description">
+                                       <font>
+                                          <Font name="Segoe UI" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
                      </children>
                   </VBox>
                </children>
@@ -66,4 +256,4 @@
          </children>
       </VBox>
    </children>
-</Pane>
+</StackPane>
