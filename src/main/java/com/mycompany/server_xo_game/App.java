@@ -17,7 +17,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("ServerPage"), 640, 480);
+        scene = new Scene(loadFXML("ServerPage"), 800, 600);
         stage.setScene(scene);
 
         // Ensure the application and server thread stop when the window is closed

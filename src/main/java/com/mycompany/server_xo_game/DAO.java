@@ -220,4 +220,40 @@ public class DAO {
             ex.printStackTrace();
         }
     }
+        public static int getTotalPlayerCount() {
+        String sql = "SELECT COUNT(*) as total FROM Player";
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/TEAM1",
+                "Team1",
+                "team1"); 
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+    public static int getPlayerCountByStatus(int status) {
+        String sql = "SELECT COUNT(*) as total FROM Player WHERE Status = ?";
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/TEAM1",
+                "Team1",
+                "team1"); 
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            
+            ps.setInt(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
 }
