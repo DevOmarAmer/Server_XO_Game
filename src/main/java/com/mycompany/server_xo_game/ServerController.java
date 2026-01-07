@@ -35,6 +35,7 @@ public class ServerController {
         DAO dao = null;
         try {
             dao = new DAO();
+            // Note: 0 points, 0 status (assuming 0 is offline/default)
             boolean success = dao.register(new PlayerModel(username, email, password, 0, 0));
             response.put("status", success ? "success" : "failed");
         } catch (SQLException ex) {
@@ -137,6 +138,108 @@ public class ServerController {
         GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
             session.handlePlayerQuit(client);
+
+    // -------------------------------------------------------------------------
+    //  NEW METHODS FIXED BELOW
+    // -------------------------------------------------------------------------
+
+    public static void getProfile(ClientHandler client) {
+        DAO dao = null;
+        try {
+            dao = new DAO();
+            PlayerModel player = dao.getPlayer(client.getUsername());
+
+            JSONObject response = new JSONObject();
+            response.put("type", "profile_response");
+
+            if (player != null) {
+                response.put("status", "success");
+                response.put("username", player.getUsername());
+                response.put("email", player.getEmail());
+                response.put("score", player.getPoints());
+                // If you don't have these columns in DB yet, send 0 or calculate them
+                response.put("wins", 0); 
+                response.put("losses", 0);
+                response.put("draws", 0);
+            } else {
+                response.put("status", "failed");
+            }
+            client.sendMessage(response);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+        }
+    }
+
+    public static void updateProfile(ClientHandler client, JSONObject request) {
+        String newUsername = request.getString("username");
+        String newEmail = request.getString("email");
+        String newPassword = request.optString("password", ""); // Empty if not changing
+
+        DAO dao = null;
+        try {
+            dao = new DAO();
+            boolean success = dao.updatePlayerInfo(client.getUsername(), newUsername, newEmail, newPassword);
+
+            JSONObject response = new JSONObject();
+            response.put("type", "update_profile_response");
+
+            if (success) {
+                response.put("status", "success");
+                
+                // IMPORTANT: If username changed, update the Server's map
+                if (!client.getUsername().equals(newUsername)) {
+                    Server.onlinePlayers.remove(client.getUsername()); // Remove old key
+                    client.setUsername(newUsername);                   // Update object
+                    Server.onlinePlayers.put(newUsername, client);     // Add new key
+                }
+            } else {
+                response.put("status", "failed");
+                response.put("reason", "Update failed (Username might be taken)");
+            }
+            client.sendMessage(response);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Send failure message so client loader stops
+            JSONObject response = new JSONObject();
+            response.put("type", "update_profile_response");
+            response.put("status", "failed");
+            response.put("reason", "Database Error");
+            client.sendMessage(response);
+        } finally {
+            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+        }
+    }
+
+    public static void deleteAccount(ClientHandler client) {
+        DAO dao = null;
+        try {
+            dao = new DAO();
+            dao.deletePlayer(client.getUsername());
+
+            JSONObject response = new JSONObject();
+            response.put("type", "delete_account_response");
+            response.put("status", "success");
+            client.sendMessage(response);
+
+            // Cleanup
+            Server.onlinePlayers.remove(client.getUsername());
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JSONObject response = new JSONObject();
+            response.put("type", "delete_account_response");
+            response.put("status", "failed");
+            client.sendMessage(response);
+        } finally {
+            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+        }
+    }
+
+    public static void logout(ClientHandler client) {
+        if (client.getUsername() != null) {
+            Server.onlinePlayers.remove(client.getUsername());
+            System.out.println(client.getUsername() + " logged out.");
         }
     }
 }
