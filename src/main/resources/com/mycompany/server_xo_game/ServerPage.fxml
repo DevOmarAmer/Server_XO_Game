@@ -18,14 +18,7 @@
       prefHeight="600.0" prefWidth="900.0"
       stylesheets="@styles/serverpage.css">
    <children>
-      <!-- Background Image -->
-      <ImageView id="backgroundimg" fx:id="bgImg" cache="true" 
-                 fitHeight="600.0" fitWidth="900.0" 
-                 pickOnBounds="true" preserveRatio="false">
-         <image>
-            <Image url="@assets/bgimg.png" />
-         </image>
-      </ImageView>
+
       
       <!-- Gradient Overlay -->
       <Pane styleClass="gradient-overlay" prefHeight="600.0" prefWidth="900.0" 
