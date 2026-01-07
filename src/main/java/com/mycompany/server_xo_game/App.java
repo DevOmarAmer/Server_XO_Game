@@ -25,8 +25,7 @@ public class App extends Application {
 
         stage.show();
 
-        // Start the Socket Server in a separate thread so it doesn't block the UI
-        new Thread(() -> Server.main(new String[]{})).start();
+    
     }
 
     static void setRoot(String fxml) throws IOException {
