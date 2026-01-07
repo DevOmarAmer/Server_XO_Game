@@ -54,6 +54,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+// Inside ClientHandler.java -> handleRequest method
     private void handleRequest(JSONObject request) {
         String type = request.getString("type");
         switch (type) {
@@ -74,6 +75,19 @@ public class ClientHandler implements Runnable {
                 break;
             case "move":
                 ServerController.handleMove(this, request);
+                break;
+            // --- NEW CASES BELOW ---
+            case "get_profile":
+                ServerController.getProfile(this);
+                break;
+            case "update_profile":
+                ServerController.updateProfile(this, request);
+                break;
+            case "delete_account":
+                ServerController.deleteAccount(this);
+                break;
+            case "logout":
+                ServerController.logout(this);
                 break;
             default:
                 System.out.println("Unknown request type: " + type);
