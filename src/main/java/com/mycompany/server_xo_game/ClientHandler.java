@@ -6,16 +6,14 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 public class ClientHandler implements Runnable {
-
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private String username; // logged-in player's username
+    private String username;
     private PlayerStatus status;
-
+    
     public ClientHandler(Socket socket) {
         this.socket = socket;
-        // Initialize status to ONLINE when client connects
         this.status = PlayerStatus.ONLINE;
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -24,17 +22,19 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
-
+    
     public void sendMessage(JSONObject json) {
+        System.out.println("[Server] Sending to " + username + ": " + json.toString());
         out.println(json.toString());
     }
-
+    
     @Override
     public void run() {
         try {
             String message;
             while ((message = in.readLine()) != null) {
                 try {
+                    System.out.println("[Server] Received from " + username + ": " + message);
                     JSONObject request = new JSONObject(message);
                     handleRequest(request);
                 } catch (JSONException e) {
@@ -44,19 +44,16 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.out.println("Client disconnected: " + username);
         } finally {
-            if (username != null) {
-                Server.onlinePlayers.remove(username);
-            }
-            try {
-                socket.close();
-            } catch (IOException ignored) {
-            }
+            cleanup();
         }
     }
+    
 
 // Inside ClientHandler.java -> handleRequest method
     private void handleRequest(JSONObject request) {
         String type = request.getString("type");
+        System.out.println("[Server] Handling request type: " + type + " from " + username);
+        
         switch (type) {
             case "login":
                 ServerController.login(this, request);
@@ -67,7 +64,7 @@ public class ClientHandler implements Runnable {
             case "get_available_players":
                 ServerController.sendAvailablePlayers(this);
                 break;
-            case "invite":
+            case "send_invite":  
                 ServerController.sendInvite(this, request);
                 break;
             case "invite_response":
@@ -76,6 +73,11 @@ public class ClientHandler implements Runnable {
             case "move":
                 ServerController.handleMove(this, request);
                 break;
+            case "play_again":
+                ServerController.handlePlayAgain(this, request);
+                break;
+            case "quit_game":
+                ServerController.handleQuitGame(this);
             // --- NEW CASES BELOW ---
             case "get_profile":
                 ServerController.getProfile(this);
@@ -93,20 +95,33 @@ public class ClientHandler implements Runnable {
                 System.out.println("Unknown request type: " + type);
         }
     }
-
+    
+    private void cleanup() {
+        if (username != null) {
+            Server.onlinePlayers.remove(username);
+            GameSession session = GameSessionManager.getSession(this);
+            if (session != null) {
+                session.handlePlayerQuit(this);
+            }
+        }
+        try {
+            if (socket != null) socket.close();
+        } catch (IOException ignored) {
+        }
+    }
+    
     public void setUsername(String username) {
         this.username = username;
     }
-
+    
     public String getUsername() {
         return username;
     }
-
-    // New Getter and Setter for Status
+    
     public void setStatus(PlayerStatus status) {
         this.status = status;
     }
-
+    
     public PlayerStatus getStatus() {
         return status;
     }

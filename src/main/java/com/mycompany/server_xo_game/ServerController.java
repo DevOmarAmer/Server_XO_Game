@@ -1,24 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.server_xo_game;
 
 import java.sql.SQLException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/**
- *
- * @author dell
- */
 public class ServerController {
 
     public static void login(ClientHandler client, JSONObject request) {
         String username = request.getString("username");
         String password = request.getString("password");
 
-        boolean success = DAO.login(username, password); // call DAO
+        boolean success = DAO.login(username, password);
         JSONObject response = new JSONObject();
         response.put("type", "login_response");
         if (success) {
@@ -65,12 +57,11 @@ public class ServerController {
 
     public static void sendAvailablePlayers(ClientHandler client) {
         JSONArray players = new JSONArray();
-        // Iterate over values to access ClientHandler objects (which hold the status)
         for (ClientHandler handler : Server.onlinePlayers.values()) {
             if (!handler.getUsername().equals(client.getUsername())) {
                 JSONObject playerInfo = new JSONObject();
                 playerInfo.put("username", handler.getUsername());
-                playerInfo.put("status", handler.getStatus().toString()); // Add status
+                playerInfo.put("status", handler.getStatus().toString());
                 players.put(playerInfo);
             }
         }
@@ -80,20 +71,30 @@ public class ServerController {
         client.sendMessage(response);
     }
 
-    // Send invite to another player
     public static void sendInvite(ClientHandler sender, JSONObject request) {
         String toUser = request.getString("to");
         ClientHandler receiver = Server.onlinePlayers.get(toUser);
 
-        if (receiver != null) {
+        if (receiver != null && receiver.getStatus() == PlayerStatus.ONLINE) {
             JSONObject invite = new JSONObject();
             invite.put("type", "invitation");
             invite.put("from", sender.getUsername());
             receiver.sendMessage(invite);
+            
+            // Send confirmation to sender
+            JSONObject confirmation = new JSONObject();
+            confirmation.put("type", "sent");
+            confirmation.put("status", "success");
+            sender.sendMessage(confirmation);
+        } else {
+            JSONObject error = new JSONObject();
+            error.put("type", "invite_sent");
+            error.put("status", "failed");
+            error.put("reason", receiver == null ? "Player not found" : "Player is busy");
+            sender.sendMessage(error);
         }
     }
 
-    // Handle invite response
     public static void handleInviteResponse(ClientHandler responder, JSONObject request) {
         String fromUser = request.getString("from");
         boolean accepted = request.getBoolean("accepted");
@@ -103,31 +104,40 @@ public class ServerController {
             JSONObject response = new JSONObject();
             response.put("type", "invite_response");
             response.put("accepted", accepted);
+            response.put("from", responder.getUsername());
 
             sender.sendMessage(response);
 
             if (accepted) {
-                // Set both players to IN_GAME
                 sender.setStatus(PlayerStatus.IN_GAME);
                 responder.setStatus(PlayerStatus.IN_GAME);
 
-                // Start a new game session
                 GameSession session = new GameSession(sender, responder);
                 new Thread(session).start();
             }
         }
     }
 
-    // Handle move made by a player
     public static void handleMove(ClientHandler client, JSONObject request) {
         int row = request.getInt("row");
         int col = request.getInt("col");
-        // Find the GameSession for this player
         GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
             session.makeMove(client, row, col);
         }
     }
+    
+    public static void handlePlayAgain(ClientHandler client, JSONObject request) {
+        GameSession session = GameSessionManager.getSession(client);
+        if (session != null) {
+            session.handlePlayAgainRequest(client);
+        }
+    }
+    
+    public static void handleQuitGame(ClientHandler client) {
+        GameSession session = GameSessionManager.getSession(client);
+        if (session != null) {
+            session.handlePlayerQuit(client);
 
     // -------------------------------------------------------------------------
     //  NEW METHODS FIXED BELOW
