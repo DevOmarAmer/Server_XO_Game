@@ -229,6 +229,12 @@ public class DAO {
             
             if (rs.next()) {
                 return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
 
     public java.util.List<PlayerModel> getTopPlayers() {
         java.util.List<PlayerModel> list = new java.util.ArrayList<>();
@@ -248,7 +254,7 @@ public class DAO {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return 0;
+        return list;
     }
     public static int getPlayerCountByStatus(int status) {
         String sql = "SELECT COUNT(*) as total FROM Player WHERE Status = ?";
@@ -268,6 +274,5 @@ public class DAO {
             ex.printStackTrace();
         }
         return 0;
-        return list;
     }
 }

@@ -228,6 +228,13 @@ public class GameSession implements Runnable {
     public synchronized void handlePlayerQuit(ClientHandler player) {
         ClientHandler opponent = (player == player1) ? player2 : player1;
         
+        // Update scores: Opponent wins (+10), Quitter gets penalty (-10)
+        DAO.updateScore(opponent.getUsername(), 10);
+        DAO.updateScore(player.getUsername(), -10);
+
+        // Save game record with opponent as winner
+        saveGameRecord(opponent.getUsername());
+
         JSONObject quitMsg = new JSONObject();
         quitMsg.put("type", "opponent_quit");
         quitMsg.put("quitter", player.getUsername());
