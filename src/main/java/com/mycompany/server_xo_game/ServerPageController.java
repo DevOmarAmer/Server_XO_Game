@@ -165,15 +165,7 @@ public class ServerPageController implements Initializable {
     
     private int getTotalPlayersFromDB() {
         try {
-            DAO dao = new DAO();
-            java.sql.ResultSet rs = dao.displayAll();
-            int count = 0;
-            while (rs.next()) {
-                count++;
-            }
-            rs.close();
-            dao.close();
-            return count;
+            return DAO.getTotalPlayerCount();
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
