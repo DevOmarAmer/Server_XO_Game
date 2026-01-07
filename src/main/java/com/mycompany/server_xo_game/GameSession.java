@@ -11,14 +11,23 @@ public class GameSession implements Runnable {
     private char[][] board = new char[3][3];
     private ClientHandler currentTurn;
     private List<JSONObject> moves = new ArrayList<>();
+    private boolean player1WantsRematch = false;
+    private boolean player2WantsRematch = false;
 
     public GameSession(ClientHandler p1, ClientHandler p2) {
         this.player1 = p1;
         this.player2 = p2;
         currentTurn = player1;
-
-        // Fix: Call the method once with both players and the session
         GameSessionManager.addSession(p1, p2, this);
+        initializeBoard();
+    }
+    
+    private void initializeBoard() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = '\0';
+            }
+        }
     }
 
     @Override
@@ -27,38 +36,80 @@ public class GameSession implements Runnable {
     }
 
     private void sendStartMessage() {
-        JSONObject start = new JSONObject();
-        start.put("type", "game_start");
-        start.put("opponent", player2.getUsername());
-        player1.sendMessage(start);
+        JSONObject start1 = new JSONObject();
+        start1.put("type", "game_start");
+        start1.put("opponent", player2.getUsername());
+        start1.put("yourSymbol", "X");
+        start1.put("yourTurn", true);
+        player1.sendMessage(start1);
 
-        start.put("opponent", player1.getUsername());
-        player2.sendMessage(start);
+        JSONObject start2 = new JSONObject();
+        start2.put("type", "game_start");
+        start2.put("opponent", player1.getUsername());
+        start2.put("yourSymbol", "O");
+        start2.put("yourTurn", false);
+        player2.sendMessage(start2);
     }
 
     public synchronized void makeMove(ClientHandler player, int row, int col) {
-        if (player != currentTurn || board[row][col] != '\0') {
+        // Validate it's the player's turn
+        if (player != currentTurn) {
+            JSONObject error = new JSONObject();
+            error.put("type", "error");
+            error.put("message", "Not your turn");
+            player.sendMessage(error);
+            return;
+        }
+        
+        // Validate move is legal
+        if (row < 0 || row > 2 || col < 0 || col > 2 || board[row][col] != '\0') {
+            JSONObject error = new JSONObject();
+            error.put("type", "error");
+            error.put("message", "Invalid move");
+            player.sendMessage(error);
             return;
         }
 
-        board[row][col] = (player == player1) ? 'X' : 'O';
+        // Make the move
+        char symbol = (player == player1) ? 'X' : 'O';
+        board[row][col] = symbol;
 
-        // send move to opponent
-        ClientHandler opponent = (player == player1) ? player2 : player1;
+        // Record the move
+        JSONObject moveRecord = new JSONObject();
+        moveRecord.put("player", player.getUsername());
+        moveRecord.put("row", row);
+        moveRecord.put("col", col);
+        moveRecord.put("symbol", String.valueOf(symbol));
+        moves.add(moveRecord);
+
+        // Send move confirmation to both players
         JSONObject moveMsg = new JSONObject();
         moveMsg.put("type", "move");
         moveMsg.put("row", row);
         moveMsg.put("col", col);
+        moveMsg.put("symbol", String.valueOf(symbol));
         moveMsg.put("player", player.getUsername());
-        moves.add(moveMsg); // Record the move
+        
+        player.sendMessage(moveMsg);
+        ClientHandler opponent = (player == player1) ? player2 : player1;
         opponent.sendMessage(moveMsg);
 
-        if (checkWin()) {
+        // Check game state
+        if (checkWin(symbol)) {
             endGame(player);
         } else if (isBoardFull()) {
             endGame(); // Draw
         } else {
             currentTurn = opponent;
+            
+            // Send turn notification
+            JSONObject turnMsg = new JSONObject();
+            turnMsg.put("type", "turn_update");
+            turnMsg.put("yourTurn", true);
+            opponent.sendMessage(turnMsg);
+            
+            turnMsg.put("yourTurn", false);
+            player.sendMessage(turnMsg);
         }
     }
 
@@ -73,17 +124,17 @@ public class GameSession implements Runnable {
         return true;
     }
 
-    private boolean checkWin() {
-        // check rows, columns, diagonals
-        char symbol = (currentTurn == player1) ? 'X' : 'O';
+    private boolean checkWin(char symbol) {
+       
         for (int i = 0; i < 3; i++) {
-            if ((board[i][0] == symbol && board[i][1] == symbol && board[i][2] == symbol)
-                    || (board[0][i] == symbol && board[1][i] == symbol && board[2][i] == symbol)) {
+            if ((board[i][0] == symbol && board[i][1] == symbol && board[i][2] == symbol) ||
+                (board[0][i] == symbol && board[1][i] == symbol && board[2][i] == symbol)) {
                 return true;
             }
         }
-        if ((board[0][0] == symbol && board[1][1] == symbol && board[2][2] == symbol)
-                || (board[0][2] == symbol && board[1][1] == symbol && board[2][0] == symbol)) {
+   
+        if ((board[0][0] == symbol && board[1][1] == symbol && board[2][2] == symbol) ||
+            (board[0][2] == symbol && board[1][1] == symbol && board[2][0] == symbol)) {
             return true;
         }
         return false;
@@ -91,41 +142,81 @@ public class GameSession implements Runnable {
 
     private void endGame(ClientHandler winner) {
         ClientHandler loser = (winner == player1) ? player2 : player1;
-        endGame(winner, loser);
-    }
+        
+        JSONObject winMsg = new JSONObject();
+        winMsg.put("type", "game_over");
+        winMsg.put("result", "win");
+        winMsg.put("winner", winner.getUsername());
+        winner.sendMessage(winMsg);
 
-    private void endGame(ClientHandler winner, ClientHandler loser) {
-        JSONObject msg = new JSONObject();
-        msg.put("type", "game_over");
-        msg.put("winner", winner.getUsername());
-        winner.sendMessage(msg);
-        loser.sendMessage(msg);
+        JSONObject loseMsg = new JSONObject();
+        loseMsg.put("type", "game_over");
+        loseMsg.put("result", "lose");
+        loseMsg.put("winner", winner.getUsername());
+        loser.sendMessage(loseMsg);
 
         // Update scores in DB
         DAO.updateScore(winner.getUsername(), 1);
         DAO.updateScore(loser.getUsername(), 0);
 
         saveGameRecord(winner.getUsername());
-
-        // Reset status to ONLINE
-        winner.setStatus(PlayerStatus.ONLINE);
-        loser.setStatus(PlayerStatus.ONLINE);
-
-        // Cleanup session
-        GameSessionManager.removeSession(winner);
-        GameSessionManager.removeSession(loser);
     }
 
     private void endGame() { // Draw
-        JSONObject msg = new JSONObject();
-        msg.put("type", "game_over");
-        msg.put("winner", "draw");
-        player1.sendMessage(msg);
-        player2.sendMessage(msg);
+        JSONObject drawMsg = new JSONObject();
+        drawMsg.put("type", "game_over");
+        drawMsg.put("result", "draw");
+        drawMsg.put("winner", "draw");
+        
+        player1.sendMessage(drawMsg);
+        player2.sendMessage(drawMsg);
 
         saveGameRecord("draw");
+    }
 
-        // Reset status to ONLINE
+    public synchronized void handlePlayAgainRequest(ClientHandler player) {
+        if (player == player1) {
+            player1WantsRematch = true;
+        } else if (player == player2) {
+            player2WantsRematch = true;
+        }
+
+        if (player1WantsRematch && player2WantsRematch) {
+            // Both players want rematch - start new game
+            resetGame();
+        } else {
+            // Notify the other player
+            ClientHandler opponent = (player == player1) ? player2 : player1;
+            JSONObject notif = new JSONObject();
+            notif.put("type", "rematch_requested");
+            notif.put("from", player.getUsername());
+            opponent.sendMessage(notif);
+        }
+    }
+    
+    private void resetGame() {
+        // Reset board
+        initializeBoard();
+        moves.clear();
+        player1WantsRematch = false;
+        player2WantsRematch = false;
+        
+        // Switch who goes first
+        currentTurn = (currentTurn == player1) ? player2 : player1;
+        
+        // Send new game start messages
+        sendStartMessage();
+    }
+
+    public synchronized void handlePlayerQuit(ClientHandler player) {
+        ClientHandler opponent = (player == player1) ? player2 : player1;
+        
+        JSONObject quitMsg = new JSONObject();
+        quitMsg.put("type", "opponent_quit");
+        quitMsg.put("quitter", player.getUsername());
+        opponent.sendMessage(quitMsg);
+
+        // Reset both players to ONLINE
         player1.setStatus(PlayerStatus.ONLINE);
         player2.setStatus(PlayerStatus.ONLINE);
 
@@ -141,7 +232,6 @@ public class GameSession implements Runnable {
         gameRecord.put("result", result);
         gameRecord.put("moves", moves);
 
-        // Assuming DAO.saveGame method exists to store the game record
         DAO.saveGame(gameRecord.toString());
     }
 }
