@@ -80,7 +80,7 @@ public class ServerController {
             invite.put("type", "invitation");
             invite.put("from", sender.getUsername());
             receiver.sendMessage(invite);
-            
+
             // Send confirmation to sender
             JSONObject confirmation = new JSONObject();
             confirmation.put("type", "sent");
@@ -126,14 +126,14 @@ public class ServerController {
             session.makeMove(client, row, col);
         }
     }
-    
+
     public static void handlePlayAgain(ClientHandler client, JSONObject request) {
         GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
             session.handlePlayAgainRequest(client);
         }
     }
-    
+
     public static void handleQuitGame(ClientHandler client) {
         GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
@@ -159,7 +159,7 @@ public class ServerController {
                 response.put("email", player.getEmail());
                 response.put("score", player.getPoints());
                 // If you don't have these columns in DB yet, send 0 or calculate them
-                response.put("wins", 0); 
+                response.put("wins", 0);
                 response.put("losses", 0);
                 response.put("draws", 0);
             } else {
@@ -169,7 +169,10 @@ public class ServerController {
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
-            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+            if (dao != null) try {
+                dao.close();
+            } catch (SQLException e) {
+            }
         }
     }
 
@@ -188,7 +191,7 @@ public class ServerController {
 
             if (success) {
                 response.put("status", "success");
-                
+
                 // IMPORTANT: If username changed, update the Server's map
                 if (!client.getUsername().equals(newUsername)) {
                     Server.onlinePlayers.remove(client.getUsername()); // Remove old key
@@ -209,7 +212,10 @@ public class ServerController {
             response.put("reason", "Database Error");
             client.sendMessage(response);
         } finally {
-            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+            if (dao != null) try {
+                dao.close();
+            } catch (SQLException e) {
+            }
         }
     }
 
@@ -233,7 +239,10 @@ public class ServerController {
             response.put("status", "failed");
             client.sendMessage(response);
         } finally {
-            if (dao != null) try { dao.close(); } catch (SQLException e) {}
+            if (dao != null) try {
+                dao.close();
+            } catch (SQLException e) {
+            }
         }
     }
 
@@ -243,4 +252,34 @@ public class ServerController {
             System.out.println(client.getUsername() + " logged out.");
         }
     }
-} 
+
+    public static void getLeaderboard(ClientHandler client) {
+        DAO dao = null;
+        try {
+            dao = new DAO();
+            java.util.List<PlayerModel> players = dao.getTopPlayers();
+
+            JSONArray list = new JSONArray();
+            for (PlayerModel p : players) {
+                JSONObject playerJson = new JSONObject();
+                playerJson.put("username", p.getUsername());
+                playerJson.put("score", p.getPoints());
+                list.put(playerJson);
+            }
+
+            JSONObject response = new JSONObject();
+            response.put("type", "leaderboard_response");
+            response.put("status", "success");
+            response.put("leaderboard", list);
+
+            client.sendMessage(response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (dao != null) try {
+                dao.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+}

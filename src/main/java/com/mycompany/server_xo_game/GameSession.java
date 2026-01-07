@@ -36,20 +36,21 @@ public class GameSession implements Runnable {
     }
 
     private void sendStartMessage() {
-        JSONObject start1 = new JSONObject();
-        start1.put("type", "game_start");
-        start1.put("opponent", player2.getUsername());
-        start1.put("yourSymbol", "X");
-        start1.put("yourTurn", true);
-        player1.sendMessage(start1);
+    JSONObject msg1 = new JSONObject();
+    msg1.put("type", "game_start");
+    msg1.put("opponent", player2.getUsername());
+    msg1.put("yourSymbol", "X");
+    msg1.put("yourTurn", currentTurn == player1);
+    player1.sendMessage(msg1);
 
-        JSONObject start2 = new JSONObject();
-        start2.put("type", "game_start");
-        start2.put("opponent", player1.getUsername());
-        start2.put("yourSymbol", "O");
-        start2.put("yourTurn", false);
-        player2.sendMessage(start2);
-    }
+    JSONObject msg2 = new JSONObject();
+    msg2.put("type", "game_start");
+    msg2.put("opponent", player1.getUsername());
+    msg2.put("yourSymbol", "O");
+    msg2.put("yourTurn", currentTurn == player2);
+    player2.sendMessage(msg2);
+}
+
 
     public synchronized void makeMove(ClientHandler player, int row, int col) {
         // Validate it's the player's turn
@@ -175,38 +176,54 @@ public class GameSession implements Runnable {
     }
 
     public synchronized void handlePlayAgainRequest(ClientHandler player) {
-        if (player == player1) {
-            player1WantsRematch = true;
-        } else if (player == player2) {
-            player2WantsRematch = true;
-        }
 
-        if (player1WantsRematch && player2WantsRematch) {
-            // Both players want rematch - start new game
-            resetGame();
-        } else {
-            // Notify the other player
-            ClientHandler opponent = (player == player1) ? player2 : player1;
-            JSONObject notif = new JSONObject();
-            notif.put("type", "rematch_requested");
-            notif.put("from", player.getUsername());
-            opponent.sendMessage(notif);
+    if (player == player1) player1WantsRematch = true;
+    if (player == player2) player2WantsRematch = true;
+
+    if (player1WantsRematch && player2WantsRematch) {
+        startNewGame();
         }
     }
-    
-    private void resetGame() {
-        // Reset board
-        initializeBoard();
-        moves.clear();
-        player1WantsRematch = false;
-        player2WantsRematch = false;
-        
-        // Switch who goes first
-        currentTurn = (currentTurn == player1) ? player2 : player1;
-        
-        // Send new game start messages
-        sendStartMessage();
+    private void startNewGame() {
+    initializeBoard();
+    moves.clear();
+
+    player1WantsRematch = false;
+    player2WantsRematch = false;
+
+    currentTurn = Math.random() < 0.5 ? player1 : player2;
+
+        sendRematchStart();
     }
+    private void sendRematchStart() {
+
+    JSONObject p1 = new JSONObject();
+    p1.put("type", "rematch_start");
+    p1.put("yourTurn", currentTurn == player1);
+    player1.sendMessage(p1);
+
+    JSONObject p2 = new JSONObject();
+    p2.put("type", "rematch_start");
+    p2.put("yourTurn", currentTurn == player2);
+    player2.sendMessage(p2);
+}
+
+
+
+    
+//    private void resetGame() {
+//        // Reset board
+//        initializeBoard();
+//        moves.clear();
+//        player1WantsRematch = false;
+//        player2WantsRematch = false;
+//        
+//        // Switch who goes first
+//        currentTurn = (currentTurn == player1) ? player2 : player1;
+//        
+//        // Send new game start messages
+//        sendStartMessage();
+//    }
 
     public synchronized void handlePlayerQuit(ClientHandler player) {
         ClientHandler opponent = (player == player1) ? player2 : player1;
