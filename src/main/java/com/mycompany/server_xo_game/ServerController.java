@@ -138,7 +138,8 @@ public class ServerController {
         GameSession session = GameSessionManager.getSession(client);
         if (session != null) {
             session.handlePlayerQuit(client);
-
+        }
+    }
     // -------------------------------------------------------------------------
     //  NEW METHODS FIXED BELOW
     // -------------------------------------------------------------------------
@@ -242,4 +243,4 @@ public class ServerController {
             System.out.println(client.getUsername() + " logged out.");
         }
     }
-}
+} 
