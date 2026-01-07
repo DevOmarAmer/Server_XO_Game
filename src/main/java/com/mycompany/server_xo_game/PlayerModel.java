@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.server_xo_game;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -10,27 +11,29 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author MahmoudTarek
  */
-public class PlayerModel{
+public class PlayerModel {
+
     private int id;
     private String username;
     private String email;
     private String passwordHash;
     private int points;
     private int status;
-    
+
     public PlayerModel(String username, String email, String plainPassword, int points, int status) {
-    this.username = username;
-    this.email = email;
-    this.passwordHash = hashPassword(plainPassword);
-    this.points = points;
-    this.status = status;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = hashPassword(plainPassword);
+        this.points = points;
+        this.status = status;
     }
 
     public int getId() {
         return id;
     }
+
     public String getIdStr() {
-        return id+"";
+        return id + "";
     }
 
     public String getUsername() {
@@ -64,14 +67,15 @@ public class PlayerModel{
     public void setPoints(int points) {
         this.points = points;
     }
+
     public int getStatus() {
-    return status;
+        return status;
     }
 
     public void setStatus(int status) {
         this.status = status;
     }
-    
+
     //Hashing Method
     public static String hashPassword(String password) {
         try {
