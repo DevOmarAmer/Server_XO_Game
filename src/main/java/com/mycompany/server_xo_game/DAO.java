@@ -174,7 +174,6 @@ public class DAO {
         return null;
     }
 
-// 2. Update Player Data (Email/Password)
     public boolean updatePlayerInfo(String currentUsername, String newUsername, String newEmail, String newPassword) {
         // 1. Define SQL: We update username, email, and optionally password
         String sql;
@@ -209,7 +208,6 @@ public class DAO {
         }
     }
 
-// 3. Delete Player
     public void deletePlayer(String username) {
         String sql = "DELETE FROM Player WHERE username = ?";
         try (Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM1", "Team1", "team1"); PreparedStatement ps = c.prepareStatement(sql)) {
@@ -219,5 +217,26 @@ public class DAO {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public java.util.List<PlayerModel> getTopPlayers() {
+        java.util.List<PlayerModel> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM Player ORDER BY points DESC";
+
+        try (Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM1", "Team1", "team1"); PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new PlayerModel(
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        "", // Password not needed for leaderboard
+                        rs.getInt("points"),
+                        rs.getInt("Status")
+                ));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }

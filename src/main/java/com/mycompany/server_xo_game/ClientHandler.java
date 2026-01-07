@@ -6,12 +6,13 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 public class ClientHandler implements Runnable {
+
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private String username;
     private PlayerStatus status;
-    
+
     public ClientHandler(Socket socket) {
         this.socket = socket;
         this.status = PlayerStatus.ONLINE;
@@ -22,12 +23,12 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
-    
+
     public void sendMessage(JSONObject json) {
         System.out.println("[Server] Sending to " + username + ": " + json.toString());
         out.println(json.toString());
     }
-    
+
     @Override
     public void run() {
         try {
@@ -47,13 +48,12 @@ public class ClientHandler implements Runnable {
             cleanup();
         }
     }
-    
 
 // Inside ClientHandler.java -> handleRequest method
     private void handleRequest(JSONObject request) {
         String type = request.getString("type");
         System.out.println("[Server] Handling request type: " + type + " from " + username);
-        
+
         switch (type) {
             case "login":
                 ServerController.login(this, request);
@@ -64,7 +64,7 @@ public class ClientHandler implements Runnable {
             case "get_available_players":
                 ServerController.sendAvailablePlayers(this);
                 break;
-            case "send_invite":  
+            case "send_invite":
                 ServerController.sendInvite(this, request);
                 break;
             case "invite_response":
@@ -90,12 +90,14 @@ public class ClientHandler implements Runnable {
                 break;
             case "logout":
                 ServerController.logout(this);
+            case "get_leaderboard":
+                ServerController.getLeaderboard(this);
                 break;
             default:
                 System.out.println("Unknown request type: " + type);
         }
     }
-    
+
     private void cleanup() {
         if (username != null) {
             Server.onlinePlayers.remove(username);
@@ -105,23 +107,25 @@ public class ClientHandler implements Runnable {
             }
         }
         try {
-            if (socket != null) socket.close();
+            if (socket != null) {
+                socket.close();
+            }
         } catch (IOException ignored) {
         }
     }
-    
+
     public void setUsername(String username) {
         this.username = username;
     }
-    
+
     public String getUsername() {
         return username;
     }
-    
+
     public void setStatus(PlayerStatus status) {
         this.status = status;
     }
-    
+
     public PlayerStatus getStatus() {
         return status;
     }
