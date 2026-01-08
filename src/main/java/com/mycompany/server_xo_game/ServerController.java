@@ -282,4 +282,18 @@ public class ServerController {
             }
         }
     }
+    
+    public static void handleEndSession(ClientHandler client) {
+    System.out.println("[Server] Handling end_session for: " + client.getUsername());
+    
+    GameSession session = GameSessionManager.getSession(client);
+    if (session != null) {
+        // Just cleanup, no penalties since game already ended
+        session.cleanupSession();
+    }
+    
+    // Set player back to ONLINE
+    client.setStatus(PlayerStatus.ONLINE);
+}
+
 }
