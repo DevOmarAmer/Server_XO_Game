@@ -239,11 +239,22 @@ public class GameSession implements Runnable {
         // Save game record with opponent as winner
         saveGameRecord(opponent.getUsername());
 
-        JSONObject quitMsg = new JSONObject();
-        quitMsg.put("type", "opponent_quit");
-        quitMsg.put("quitter", player.getUsername());
-        opponent.sendMessage(quitMsg);
+        // Notify the quitting player that they lost by forfeit
+        JSONObject loseMsg = new JSONObject();
+        loseMsg.put("type", "game_over");
+        loseMsg.put("result", "lose");
+        loseMsg.put("winner", opponent.getUsername()); // Indicate who won
+        loseMsg.put("forfeit", true); // Indicate this is a forfeit
+        player.sendMessage(loseMsg); // Send to the quitting player
 
+        // Notify the opponent that they won by forfeit
+        JSONObject winMsg = new JSONObject();
+        winMsg.put("type", "game_over");
+        winMsg.put("result", "win");
+        winMsg.put("winner", opponent.getUsername());
+        winMsg.put("forfeit", true); // Indicate this is a forfeit
+        opponent.sendMessage(winMsg);
+        
         // Reset both players to ONLINE
         player1.setStatus(PlayerStatus.ONLINE);
         player2.setStatus(PlayerStatus.ONLINE);

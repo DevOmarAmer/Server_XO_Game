@@ -103,7 +103,7 @@ public class ClientHandler implements Runnable {
         if (username != null) {
             Server.onlinePlayers.remove(username);
             GameSession session = GameSessionManager.getSession(this);
-            if (session != null) {
+            if (session != null ) {
                 session.handlePlayerQuit(this);
             }
         }
