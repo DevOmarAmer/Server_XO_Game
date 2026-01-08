@@ -228,41 +228,57 @@ public class GameSession implements Runnable {
 //        // Send new game start messages
 //        sendStartMessage();
 //    }
+public synchronized void handlePlayerQuit(ClientHandler player) {
+    System.out.println("[GameSession] Player quit (forfeit): " + player.getUsername());
+    
+    ClientHandler opponent = (player == player1) ? player2 : player1;
+    
+    // Apply forfeit penalties
+    DAO.updatePlayerStats(opponent.getUsername(), "WIN");
+    DAO.updatePlayerStats(player.getUsername(), "LOSS");
 
-    public synchronized void handlePlayerQuit(ClientHandler player) {
-        ClientHandler opponent = (player == player1) ? player2 : player1;
-        
-        // Opponent wins, quitter loses
-        DAO.updatePlayerStats(opponent.getUsername(), "WIN");
-        DAO.updatePlayerStats(player.getUsername(), "LOSS");
+    // Save game record with opponent as winner
+    saveGameRecord(opponent.getUsername() + " (Opponent Forfeited)");
 
-        // Save game record with opponent as winner
-        saveGameRecord(opponent.getUsername());
+    // Notify the quitting player that they lost by forfeit
+    JSONObject loseMsg = new JSONObject();
+    loseMsg.put("type", "game_over");
+    loseMsg.put("result", "lose");
+    loseMsg.put("winner", opponent.getUsername());
+    loseMsg.put("forfeit", true);
+    player.sendMessage(loseMsg);
 
-        // Notify the quitting player that they lost by forfeit
-        JSONObject loseMsg = new JSONObject();
-        loseMsg.put("type", "game_over");
-        loseMsg.put("result", "lose");
-        loseMsg.put("winner", opponent.getUsername()); // Indicate who won
-        loseMsg.put("forfeit", true); // Indicate this is a forfeit
-        player.sendMessage(loseMsg); // Send to the quitting player
+    // Notify the opponent that they won by forfeit
+    JSONObject winMsg = new JSONObject();
+    winMsg.put("type", "game_over");
+    winMsg.put("result", "win");
+    winMsg.put("winner", opponent.getUsername());
+    winMsg.put("forfeit", true);
+    opponent.sendMessage(winMsg);
+    
+    // Reset both players to ONLINE
+    player1.setStatus(PlayerStatus.ONLINE);
+    player2.setStatus(PlayerStatus.ONLINE);
 
-        // Notify the opponent that they won by forfeit
-        JSONObject winMsg = new JSONObject();
-        winMsg.put("type", "game_over");
-        winMsg.put("result", "win");
-        winMsg.put("winner", opponent.getUsername());
-        winMsg.put("forfeit", true); // Indicate this is a forfeit
-        opponent.sendMessage(winMsg);
-        
-        // Reset both players to ONLINE
-        player1.setStatus(PlayerStatus.ONLINE);
-        player2.setStatus(PlayerStatus.ONLINE);
+    // Cleanup session
+    GameSessionManager.removeSession(player1);
+    GameSessionManager.removeSession(player2);
+}
 
-        // Cleanup session
-        GameSessionManager.removeSession(player1);
-        GameSessionManager.removeSession(player2);
-    }
+public synchronized void cleanupSession() {
+   System.out.println("[GameSession] Cleaning up session (no penalties)");
+    
+  
+   player1.setStatus(PlayerStatus.ONLINE);
+    player2.setStatus(PlayerStatus.ONLINE);
+
+   GameSessionManager.removeSession(player1);
+    GameSessionManager.removeSession(player2);
+}
+//
+///**
+// * Handle player quitting mid-game (forfeit with penalties)
+// */
 
     private void saveGameRecord(String result) {
         JSONObject gameRecord = new JSONObject();
