@@ -94,6 +94,9 @@ public class ClientHandler implements Runnable {
             case "get_leaderboard":
                 ServerController.getLeaderboard(this);
                 break;
+             case "end_session":  // NEW CASE - No penalty, just cleanup
+            ServerController.handleEndSession(this);
+            break;
             default:
                 System.out.println("Unknown request type: " + type);
         }
