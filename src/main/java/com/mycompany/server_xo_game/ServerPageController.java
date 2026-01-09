@@ -44,6 +44,10 @@ public class ServerPageController implements Initializable {
     private VBox offlineVbox;
     @FXML
     private Label offlineNum;
+    @FXML
+    private Label serverIpLabel;
+    @FXML
+    private Label serverIpValue;
     
     private boolean serverRunning = false;
     private Thread serverThread;
@@ -206,6 +210,12 @@ public class ServerPageController implements Initializable {
         statsUpdater.start();
         
         System.out.println("Server started successfully");
+        
+        // Display Server IP
+        String ipAddress = Server.getServerIP();
+        Platform.runLater(() -> {
+            serverIpValue.setText(ipAddress);
+        });
     }
     
     private void stopServer() {
@@ -235,6 +245,11 @@ public class ServerPageController implements Initializable {
             serverRunning = false;
             startButton.setText("Start Server");
             startButton.getStyleClass().remove("server-running");
+            
+            // Clear Server IP
+            Platform.runLater(() -> {
+                serverIpValue.setText("");
+            });
             
             // Update stats one last time to show all offline
             updateStats();

@@ -61,6 +61,24 @@
                               </Label>
                            </children>
                         </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="ip-container">
+                           <padding>
+                              <Insets top="6" bottom="6" left="15" right="15" />
+                           </padding>
+                           <children>
+                              <Label fx:id="serverIpLabel" text="Server IP: " textFill="#FFFFFF">
+                                 <font>
+                                    <Font name="Segoe UI Semibold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="serverIpValue" text="" textFill="#FFFFFF">
+                                 <font>
+                                    <Font name="Segoe UI Semibold" size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
                   

@@ -1,9 +1,12 @@
 package com.mycompany.server_xo_game;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
@@ -12,6 +15,41 @@ public class Server {
     public static volatile boolean isRunning = false;
     // Store online players and their ClientHandlers
     public static ConcurrentHashMap<String, ClientHandler> onlinePlayers = new ConcurrentHashMap<>();
+    
+    public static String getServerIP() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            String wifiIP = null;
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isLoopback() || !iface.isUp())
+                    continue;
+
+                String displayName = iface.getDisplayName().toLowerCase();
+                boolean isPreferred = displayName.contains("wi-fi") || displayName.contains("wlan");
+
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr.isLinkLocalAddress() || addr.isLoopbackAddress() || !(addr instanceof java.net.Inet4Address))
+                        continue;
+                    
+                    if (isPreferred) {
+                        return addr.getHostAddress();
+                    }
+                    if (wifiIP == null) {
+                        wifiIP = addr.getHostAddress();
+                    }
+                }
+            }
+            if (wifiIP != null) {
+                return wifiIP;
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return "Unavailable";
+    }
     
     public static void main(String[] args) {
         System.out.println("Attempting to start server on port " + PORT + "...");
