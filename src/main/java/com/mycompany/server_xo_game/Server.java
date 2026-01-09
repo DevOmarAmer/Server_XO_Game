@@ -26,7 +26,7 @@ public class Server {
                     continue;
 
                 String displayName = iface.getDisplayName().toLowerCase();
-                boolean isPreferred = displayName.contains("wi-fi") || displayName.contains("wlan") || displayName.contains("eth");
+                boolean isPreferred = displayName.contains("wi-fi") || displayName.contains("wlan");
 
                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                 while(addresses.hasMoreElements()) {
