@@ -256,29 +256,25 @@ public synchronized void handlePlayerQuit(ClientHandler player) {
     winMsg.put("forfeit", true);
     opponent.sendMessage(winMsg);
     
-    // Reset both players to ONLINE
-    player1.setStatus(PlayerStatus.ONLINE);
-    player2.setStatus(PlayerStatus.ONLINE);
+    cleanupSession();
+}
 
-    // Cleanup session
+public synchronized void cleanupSession() {
+    System.out.println("[GameSession] Cleaning up session (no penalties)");
+    
+    // Reset both players to ONLINE
+    if (player1 != null) {
+        player1.setStatus(PlayerStatus.ONLINE);
+    }
+    if (player2 != null) {
+        player2.setStatus(PlayerStatus.ONLINE);
+    }
+
+    // Remove session mappings for both players
     GameSessionManager.removeSession(player1);
     GameSessionManager.removeSession(player2);
 }
 
-public synchronized void cleanupSession() {
-   System.out.println("[GameSession] Cleaning up session (no penalties)");
-    
-  
-   player1.setStatus(PlayerStatus.ONLINE);
-    player2.setStatus(PlayerStatus.ONLINE);
-
-   GameSessionManager.removeSession(player1);
-    GameSessionManager.removeSession(player2);
-}
-//
-///**
-// * Handle player quitting mid-game (forfeit with penalties)
-// */
 
     private void saveGameRecord(String result) {
         JSONObject gameRecord = new JSONObject();
