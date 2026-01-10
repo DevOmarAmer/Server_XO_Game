@@ -91,12 +91,16 @@ public class ClientHandler implements Runnable {
                 break;
             case "logout":
                 ServerController.logout(this);
+                break; // Added break statement
             case "get_leaderboard":
                 ServerController.getLeaderboard(this);
                 break;
              case "end_session":  // NEW CASE - No penalty, just cleanup
             ServerController.handleEndSession(this);
             break;
+            case "status_update": // NEW CASE for handling status updates
+                ServerController.handleStatusUpdate(this, request);
+                break;
             default:
                 System.out.println("Unknown request type: " + type);
         }
