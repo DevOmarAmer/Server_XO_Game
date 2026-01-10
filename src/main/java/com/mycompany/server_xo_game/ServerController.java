@@ -283,17 +283,96 @@ public class ServerController {
         }
     }
     
-    public static void handleEndSession(ClientHandler client) {
-    System.out.println("[Server] Handling end_session for: " + client.getUsername());
+        public static void handleEndSession(ClientHandler client) {
     
-    GameSession session = GameSessionManager.getSession(client);
-    if (session != null) {
-        // Just cleanup, no penalties since game already ended
-        session.cleanupSession();
+        System.out.println("[Server] Handling end_session for: " + client.getUsername());
+    
+        
+    
+        GameSession session = GameSessionManager.getSession(client);
+    
+        if (session != null) {
+    
+            // Just cleanup, no penalties since game already ended
+    
+            session.cleanupSession();
+    
+        }
+    
+        
+    
+        // Set player back to ONLINE
+    
+        client.setStatus(PlayerStatus.ONLINE);
+    
     }
     
-    // Set player back to ONLINE
-    client.setStatus(PlayerStatus.ONLINE);
-}
-
-}
+    
+    
+        public static void handleStatusUpdate(ClientHandler client, JSONObject request) {
+    
+            String statusString = request.getString("status");
+    
+            try {
+    
+                            PlayerStatus newStatus = PlayerStatus.valueOf(statusString.toUpperCase());
+    
+                            client.setStatus(newStatus);
+    
+                            System.out.println("Player " + client.getUsername() + " status updated to: " + newStatus.name());
+    
+                
+    
+                            // Update status in the database
+    
+                            DAO dao = null;
+    
+                            try {
+    
+                                dao = new DAO();
+    
+                                dao.updatePlayerStatus(client.getUsername(), newStatus.ordinal());
+    
+                            } catch (SQLException e) {
+    
+                                System.err.println("Error updating player status in DB for " + client.getUsername() + ": " + e.getMessage());
+    
+                            } finally {
+    
+                                if (dao != null) {
+    
+                                    try {
+    
+                                        dao.close();
+    
+                                    } catch (SQLException e) {
+    
+                                        e.printStackTrace();
+    
+                                    }
+    
+                                }
+    
+                            }
+    
+                
+    
+                            // Notify all online players about the status change
+    
+                Server.onlinePlayers.values().forEach(handler -> {
+    
+                    sendAvailablePlayers(handler); // Resend the updated list of available players
+    
+                });
+    
+    
+    
+            } catch (IllegalArgumentException e) {
+    
+                System.err.println("Invalid PlayerStatus received: " + statusString);
+    
+            }
+    
+        }
+    
+    }

@@ -230,7 +230,7 @@ public class DAO {
         }
     }
 
-    public static int getTotalPlayerCount() {
+    public int getTotalPlayerCount() {
         String sql = "SELECT COUNT(*) as total FROM Player";
         try (Connection c = DriverManager.getConnection(
                 "jdbc:derby://localhost:1527/TEAM1",
@@ -248,7 +248,7 @@ public class DAO {
         return 0;
     }
 
-    public static int getPlayerCountByStatus(int status) {
+    public int getPlayerCountByStatus(int status) {
         String sql = "SELECT COUNT(*) as total FROM Player WHERE Status = ?";
         try (Connection c = DriverManager.getConnection(
                 "jdbc:derby://localhost:1527/TEAM1",
@@ -266,6 +266,18 @@ public class DAO {
             ex.printStackTrace();
         }
         return 0;
+    }
+    
+    // New method to update player status in the database
+    public boolean updatePlayerStatus(String username, int status) throws SQLException {
+        String sql = "UPDATE Player SET Status = ? WHERE username = ?";
+        try (Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM1", "Team1", "team1");
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, status);
+            ps.setString(2, username);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        }
     }
 
     public void close() throws SQLException {
