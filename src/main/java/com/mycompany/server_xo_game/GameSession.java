@@ -14,10 +14,17 @@ public class GameSession implements Runnable {
     private boolean player1WantsRematch = false;
     private boolean player2WantsRematch = false;
 
+    private enum GameState {
+        IN_PROGRESS,
+        GAME_OVER
+    }
+    private GameState gameState;
+
     public GameSession(ClientHandler p1, ClientHandler p2) {
         this.player1 = p1;
         this.player2 = p2;
         currentTurn = player1;
+        this.gameState = GameState.IN_PROGRESS;
         GameSessionManager.addSession(p1, p2, this);
         initializeBoard();
     }
@@ -142,6 +149,7 @@ public class GameSession implements Runnable {
     }
 
     private void endGame(ClientHandler winner) {
+        this.gameState = GameState.GAME_OVER;
         ClientHandler loser = (winner == player1) ? player2 : player1;
         
         JSONObject winMsg = new JSONObject();
@@ -164,6 +172,7 @@ public class GameSession implements Runnable {
     }
 
     private void endGame() { // Draw
+        this.gameState = GameState.GAME_OVER;
         JSONObject drawMsg = new JSONObject();
         drawMsg.put("type", "game_over");
         drawMsg.put("result", "draw");
@@ -180,17 +189,35 @@ public class GameSession implements Runnable {
     }
 
     public synchronized void handlePlayAgainRequest(ClientHandler player) {
+        if (gameState != GameState.GAME_OVER) {
+            return; // Ignore if game isn't over
+        }
 
-    if (player == player1) player1WantsRematch = true;
-    if (player == player2) player2WantsRematch = true;
+        ClientHandler opponent = (player == player1) ? player2 : player1;
 
-    if (player1WantsRematch && player2WantsRematch) {
-        startNewGame();
+        if (player == player1) {
+            player1WantsRematch = true;
+            // Notify player 2 that player 1 wants to play again
+            JSONObject p2Notify = new JSONObject();
+            p2Notify.put("type", "opponent_wants_rematch");
+            player2.sendMessage(p2Notify);
+        } else if (player == player2) {
+            player2WantsRematch = true;
+            // Notify player 1 that player 2 wants to play again
+            JSONObject p1Notify = new JSONObject();
+            p1Notify.put("type", "opponent_wants_rematch");
+            player1.sendMessage(p1Notify);
+        }
+
+        if (player1WantsRematch && player2WantsRematch) {
+            startNewGame();
         }
     }
     private void startNewGame() {
     initializeBoard();
     moves.clear();
+    
+    this.gameState = GameState.IN_PROGRESS;
 
     player1WantsRematch = false;
     player2WantsRematch = false;
@@ -229,6 +256,19 @@ public class GameSession implements Runnable {
 //        sendStartMessage();
 //    }
 public synchronized void handlePlayerQuit(ClientHandler player) {
+    // If game is over, the player is just leaving the session
+    if (gameState == GameState.GAME_OVER) {
+        System.out.println("[GameSession] Player left post-game: " + player.getUsername());
+        ClientHandler opponent = (player == player1) ? player2 : player1;
+        if (opponent != null) {
+            JSONObject msg = new JSONObject();
+            msg.put("type", "opponent_left");
+            opponent.sendMessage(msg);
+        }
+        cleanupSession();
+        return;
+    }
+    
     System.out.println("[GameSession] Player quit (forfeit): " + player.getUsername());
     
     ClientHandler opponent = (player == player1) ? player2 : player1;
