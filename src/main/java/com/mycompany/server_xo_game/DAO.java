@@ -230,7 +230,7 @@ public class DAO {
         }
     }
 
-    public int getTotalPlayerCount() {
+    public static int getTotalPlayerCount() {
         String sql = "SELECT COUNT(*) as total FROM Player";
         try (Connection c = DriverManager.getConnection(
                 "jdbc:derby://localhost:1527/TEAM1",
